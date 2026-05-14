@@ -10,7 +10,7 @@ function App() {
   const [message, setMessage] = useState("");
 
   const fetchDomains = async () => {
-    const res = await fetch("https://domain-monitoring-xxxx.onrender.com/domains");
+    const res = await fetch("http://127.0.0.1:8000/domains");
     const data = await res.json();
     setDomains(data);
   };
@@ -26,7 +26,7 @@ function App() {
   }, []);
 
   const login = async () => {
-    const res = await fetch("https://domain-monitoring-xxxx.onrender.com/login", {
+    const res = await fetch("http://127.0.0.1:8000/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -51,7 +51,7 @@ function App() {
   };
 
   const addDomain = async () => {
-    const res = await fetch(`https://domain-monitoring-xxxx.onrender.com/domains?token=${token}`, {
+    const res = await fetch(`http://127.0.0.1:8000/domains?token=${token}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ domain_name: domain }),
@@ -68,7 +68,7 @@ function App() {
   };
 
   const checkDomain = async (id) => {
-    await fetch(`https://domain-monitoring-xxxx.onrender.com/check/${id}`, {
+    await fetch(`http://127.0.0.1:8000/check/${id}`, {
       method: "POST",
     });
 
@@ -76,7 +76,7 @@ function App() {
   };
 
   const deleteDomain = async (id) => {
-    await fetch(`https://domain-monitoring-xxxx.onrender.com/domains/${id}`, {
+    await fetch(`http://127.0.0.1:8000/domains/${id}`, {
       method: "DELETE",
     });
 

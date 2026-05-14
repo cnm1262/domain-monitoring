@@ -8,17 +8,14 @@ from datetime import datetime
 from database import engine, Base, SessionLocal
 import models
 import schemas
-from backend.auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
+from auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 
 app = FastAPI()
 
 # ✅ CORS (مهم ل React)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://domain-monitoring-pi.vercel.app"
-    ],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

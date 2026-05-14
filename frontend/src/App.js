@@ -4,6 +4,7 @@ function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [token, setToken] = useState(() => localStorage.getItem("token") || "");
   const [token, setToken] = useState("");
   const [domain, setDomain] = useState("");
   const [domains, setDomains] = useState([]);

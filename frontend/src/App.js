@@ -35,6 +35,7 @@ function App() {
     const data = await res.json();
 
     if (res.ok) {
+      localStorage.setItem("token", data.access_token);
       setToken(data.access_token);
       setMessage("Login successful ✅");
       fetchDomains();
@@ -44,6 +45,7 @@ function App() {
   };
 
   const logout = () => {
+    localStorage.removeItem("token");
     setToken("");
     setEmail("");
     setPassword("");
@@ -88,7 +90,7 @@ function App() {
     <div style={styles.page}>
       <div style={styles.container}>
         <div style={styles.header}>
-          <h1 style={styles.title}>🌐 Domain Monitoring</h1>
+          <h1 style={styles.title}>🌐 Domain Monitoring v2</h1>
           {token && (
             <button onClick={logout} style={styles.logoutButton}>
               Logout

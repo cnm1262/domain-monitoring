@@ -8,7 +8,7 @@ from datetime import datetime
 from database import engine, Base, SessionLocal
 import models
 import schemas
-from auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
+from backend.auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 
 app = FastAPI()
 

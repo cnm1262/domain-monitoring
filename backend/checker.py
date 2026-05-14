@@ -29,8 +29,8 @@ def check_website(url):
 
 
 def send_email(to_email, domain):
-    sender = "tarrechaimae@gmail.com"
-    password = "حطي هنا App Password ديالك"
+    sender = "cnm1262@gmail.com"
+    password = "gchm rvsv zacz ocbj"
 
     subject = f"⚠️ Site Down: {domain}"
     body = f"The site {domain} is DOWN."

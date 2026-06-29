@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 
 function App() {
-  const API = "http://127.0.0.1:8000";
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -12,157 +10,87 @@ function App() {
   const [message, setMessage] = useState("");
 
   const fetchDomains = async () => {
-    try {
-      const savedToken = localStorage.getItem("token");
-
-      if (!savedToken) {
-        setDomains([]);
-        return;
-      }
-
-      const res = await fetch(`${API}/my-domains`, {
-        headers: {
-          Authorization: `Bearer ${savedToken}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setDomains(data);
-      } else {
-        console.log("Fetch domains error:", data);
-        setMessage(data.detail || "Erreur lors du chargement des domaines");
-      }
-    } catch (err) {
-      console.error("fetchDomains error:", err);
-      setMessage("Erreur de connexion avec le backend");
-    }
+    const res = await fetch("https://domain-monitoring-i1om.onrender.com/domains");
+    const data = await res.json();
+    setDomains(data);
   };
 
   useEffect(() => {
-    if (token) {
+    fetchDomains();
+
+    const interval = setInterval(() => {
       fetchDomains();
+    }, 5000);
 
-      const interval = setInterval(() => {
-        fetchDomains();
-      }, 5000);
-
-      return () => clearInterval(interval);
-    }
-  }, [token]);
+    return () => clearInterval(interval);
+  }, []);
 
   const login = async () => {
-    try {
-      const res = await fetch(`${API}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const res = await fetch("https://domain-monitoring-i1om.onrender.com/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (res.ok) {
-        localStorage.setItem("token", data.access_token);
-        setToken(data.access_token);
-        setMessage("Login successful ✅");
-        fetchDomains();
-      } else {
-        setMessage(data.detail || "Login failed ❌");
-      }
-    } catch (err) {
-      console.error("login error:", err);
-      setMessage("Erreur de connexion avec le backend");
+    if (res.ok) {
+      localStorage.setItem("token", data.access_token);
+      setToken(data.access_token);
+      setMessage("Login successful ✅");
+      fetchDomains();
+    } else {
+      setMessage("Login failed ❌");
     }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     setToken("");
-    setDomains([]);
     setEmail("");
     setPassword("");
     setMessage("Logged out");
   };
 
   const addDomain = async () => {
-    try {
-      if (!domain.trim()) {
-        setMessage("Veuillez saisir un domaine");
-        return;
-      }
+    const res = await fetch(`https://domain-monitoring-i1om.onrender.com/domains?token=${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ domain_name: domain }),
+    });
 
-      const res = await fetch(`${API}/domains?token=${token}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ domain_name: domain }),
-      });
-
+    if (res.ok) {
+      setDomain("");
+      setMessage("Domain added ✅");
+      fetchDomains();
+    } else {
       const data = await res.json();
-
-      if (res.ok) {
-        setDomain("");
-        setMessage("Domain added ✅");
-        fetchDomains();
-      } else {
-        setMessage(data.detail || "Add domain failed ❌");
-      }
-    } catch (err) {
-      console.error("addDomain error:", err);
-      setMessage("Erreur lors de l'ajout du domaine");
+      setMessage(data.detail || "Add domain failed ❌");
     }
   };
 
   const checkDomain = async (id) => {
-    try {
-      const res = await fetch(`${API}/check/${id}`, {
-        method: "POST",
-      });
+    await fetch(`https://domain-monitoring-i1om.onrender.com/check/${id}`, {
+      method: "POST",
+    });
 
-      const data = await res.json();
-      console.log("Check result:", data);
-
-      if (res.ok) {
-        setMessage("Domain checked ✅");
-        fetchDomains();
-      } else {
-        setMessage(data.detail || "Check failed ❌");
-      }
-    } catch (err) {
-      console.error("checkDomain error:", err);
-      setMessage("Erreur lors de la vérification");
-    }
+    fetchDomains();
   };
-    const deleteDomain = async (id) => {
-    try {
-      const res = await fetch(`${API}/domains/${id}`, {
-        method: "DELETE",
-      });
 
-      const data = await res.json();
+  const deleteDomain = async (id) => {
+    await fetch(`https://domain-monitoring-i1om.onrender.com/domains/${id}`, {
+      method: "DELETE",
+    });
 
-      if (res.ok) {
-        setMessage("Domain deleted ✅");
-        fetchDomains();
-      } else {
-        setMessage(data.detail || "Delete failed ❌");
-      }
-    } catch (err) {
-      console.error("deleteDomain error:", err);
-      setMessage("Erreur lors de la suppression");
-    }
+    setMessage("Domain deleted ✅");
+    fetchDomains();
   };
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
         <div style={styles.header}>
-          <h1 style={styles.title}>🌐 Domain Monitoring</h1>
-
+          <h1 style={styles.title}>🌐 Domain Monitoring v2</h1>
           {token && (
             <button onClick={logout} style={styles.logoutButton}>
               Logout
@@ -214,6 +142,8 @@ function App() {
 
         {message && <p style={styles.message}>{message}</p>}
 
+        <h2 style={styles.sectionTitle}> </h2>
+
         <div style={styles.grid}>
           {domains.map((d) => (
             <div key={d.id} style={styles.domainCard}>
@@ -228,9 +158,7 @@ function App() {
                     color: d.current_status === "up" ? "#047857" : "#b91c1c",
                   }}
                 >
-                  {d.current_status
-                    ? d.current_status.toUpperCase()
-                    : "UNKNOWN"}
+                  {d.current_status.toUpperCase()}
                 </span>
               </div>
 
@@ -315,6 +243,9 @@ const styles = {
   message: {
     fontWeight: "bold",
     color: "#2563eb",
+  },
+  sectionTitle: {
+    marginTop: "30px",
   },
   grid: {
     display: "grid",

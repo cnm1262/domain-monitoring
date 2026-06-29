@@ -4,18 +4,35 @@ function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(() => localStorage.getItem("token") || "");
   const [domain, setDomain] = useState("");
   const [domains, setDomains] = useState([]);
   const [message, setMessage] = useState("");
 
   const fetchDomains = async () => {
-    const res = await fetch("http://127.0.0.1:8000/domains");
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    setDomains([]);
+    return;
+  }
+
+  const res = await fetch(
+    "http://127.0.0.1:8000/my-domains",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (res.ok) {
     const data = await res.json();
     setDomains(data);
-  };
-
+  }
+};
   useEffect(() => {
+  if (token) {
     fetchDomains();
 
     const interval = setInterval(() => {
@@ -23,7 +40,8 @@ function App() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }
+}, [token]);
 
   const login = async () => {
     const res = await fetch("http://127.0.0.1:8000/login", {
@@ -35,6 +53,7 @@ function App() {
     const data = await res.json();
 
     if (res.ok) {
+      localStorage.setItem("token", data.access_token);
       setToken(data.access_token);
       setMessage("Login successful ✅");
       fetchDomains();
@@ -44,11 +63,13 @@ function App() {
   };
 
   const logout = () => {
-    setToken("");
-    setEmail("");
-    setPassword("");
-    setMessage("Logged out");
-  };
+  localStorage.removeItem("token");
+  setToken("");
+  setDomains([]);
+  setEmail("");
+  setPassword("");
+  setMessage("Logged out");
+};
 
   const addDomain = async () => {
     const res = await fetch(`http://127.0.0.1:8000/domains?token=${token}`, {
@@ -140,7 +161,7 @@ function App() {
 
         {message && <p style={styles.message}>{message}</p>}
 
-        <h2 style={styles.sectionTitle}>Monitored Domains</h2>
+        <h2 style={styles.sectionTitle}> </h2>
 
         <div style={styles.grid}>
           {domains.map((d) => (

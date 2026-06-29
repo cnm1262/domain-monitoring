@@ -30,7 +30,7 @@ def check_website(url):
 
 def send_email(to_email, domain):
     sender = "tarrechaimae@gmail.com"
-    password = "حطي هنا App Password ديالك"
+    password = "ahjg zyyd saxf grdl"
 
     subject = f"⚠️ Site Down: {domain}"
     body = f"The site {domain} is DOWN."
@@ -77,8 +77,14 @@ def run_monitoring():
 
         # Smart alert: email فقط إلا تبدل من up إلى down
         if old_status == "up" and result["status"] == "down":
-            print("Sending alert:", domain.domain_name)
-            send_email("tarrechaimae@gmail.com", domain.domain_name)
+    print("Sending alert:", domain.domain_name)
+
+    user = db.query(models.User).filter(
+        models.User.id == domain.user_id
+    ).first()
+
+    if user:
+        send_email(user.email, domain.domain_name)
 
     db.commit()
     db.close()

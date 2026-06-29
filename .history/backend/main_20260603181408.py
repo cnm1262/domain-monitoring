@@ -8,7 +8,7 @@ from datetime import datetime
 from database import engine, Base, SessionLocal
 import models
 import schemas
-from backend.auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
+from auth import hash_password, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 
 app = FastAPI()
 
@@ -77,11 +77,23 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
 
 # Get Domains
 @app.get("/domains")
-def get_domains(db: Session = Depends(get_db)):
-    domains = db.query(models.Domain).all()
+def get_domains(token: str, db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+    except:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    current_user = db.query(models.User).filter(models.User.email == email).first()
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    domains = db.query(models.Domain).filter(
+        models.Domain.user_id == current_user.id
+    ).all()
+
     return domains
-
-
 # Add Domain (مع منع التكرار)
 @app.post("/domains", response_model=schemas.DomainResponse)
 def add_domain(
